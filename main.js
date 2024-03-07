@@ -2,6 +2,7 @@ import './style.css'
 import {resources} from "./src/Resource.js";
 import {Sprite} from "./src/Sprite.js";
 import {Vector2} from "./src/Vector2.js";
+import {GameLoop} from "./src/GameLoop.js";
 
 const canvas = document.querySelector("#game-canvas");
 const ctx = canvas.getContext("2d");
@@ -17,15 +18,25 @@ const groundSprite = new Sprite({
     frameSize: new Vector2(320, 180)
 })  
 
+const hero = new Sprite({
+    resource: resources.images.hero,
+    frameSize: new Vector2(32, 32),
+    hFrames: 3,
+    vFrames: 8,
+    frame: 1
+})
+
 const shadow = new Sprite({
     resource: resources.images.shadow,
     frameSize: new Vector2(32, 32),
 
 })
 
-
-
 const heroPos = new Vector2(16 * 5, 16 * 5);
+
+const update = () => {
+    // Updating entities in the gamu
+};
 
 const draw = () => {
     skySprite.drawImage(ctx, 0, 0);
@@ -41,10 +52,5 @@ const draw = () => {
 }
 
 
-
-
-//======================================= Here we are drawing things on the screen (frames!)
-setInterval(() => {
-    draw()
-}, 300)
-
+const gameLoop = new GameLoop(update, draw);
+gameLoop.start();
