@@ -5,6 +5,7 @@ export const DOWN = "DOWN"
 
 export class Input{
     constructor() {
+        
         this.heldDirections = [];
 
         document.addEventListener("keydown", (e) => {

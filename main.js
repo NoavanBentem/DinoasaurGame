@@ -53,7 +53,7 @@ const update = () => {
 
 const tryMove = () => {
 
-    if (input.direction) {
+    if (!input.direction) {
         return;
     }
 
@@ -64,6 +64,7 @@ const tryMove = () => {
     if (input.direction === 'LEFT') {
         nextX -= gridSize;
         hero.frame = 9;
+        console.log("LEFT");
     }
 
     if (input.direction === 'RIGHT') {
