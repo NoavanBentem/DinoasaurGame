@@ -3,130 +3,54 @@ import {resources} from "./src/Resource.js";
 import {Sprite} from "./src/Sprite.js";
 import {Vector2} from "./src/Vector2.js";
 import {GameLoop} from "./src/GameLoop.js";
-import {LEFT, RIGHT, UP, DOWN, Input} from "./src/Input.js";
-import {gridCells, isSpaceFree} from './src/helpers/grid.js';
-import {moveTowards} from './src/helpers/moveTowards.js';
-import {walls} from './src/levels/lvl1.js';
-import {Animations} from './src/Animations.js';
-import {FrameIndexPattern} from './src/FrameIndexPattern.js';
-import {STAND_DOWN, STAND_LEFT, STAND_RIGHT, STAND_UP, WALK_DOWN, WALK_LEFT, WALK_RIGHT, WALK_UP} from './src/objects/Hero/heroAnimations.js';
+import {Input} from "./src/Input.js";
+import {gridCells} from './src/helpers/grid.js';
+import { GameObject } from './src/GameObject.js';
+import { Hero } from './src/objects/Hero/Hero.js';
 
 
-
-
+// Canvas to draw in
 const canvas = document.querySelector("#game-canvas");
 const ctx = canvas.getContext("2d");
 
+// Be god
+const mainScene = new GameObject({
+    position: new Vector2(0, 0)
+})
 
+// Build up scene by adding in avant-art
 const skySprite = new Sprite({
     resource: resources.images.sky,
     frameSize: new Vector2(320, 180)
 })  
+mainScene.addChild(skySprite);
 
 const groundSprite = new Sprite({
     resource: resources.images.ground,
     frameSize: new Vector2(320, 180)
 })  
+mainScene.addChild(groundSprite);
 
-const hero = new Sprite({
-    resource: resources.images.hero,
-    frameSize: new Vector2(32, 32),
-    hFrames: 3,
-    vFrames: 8,
-    frame: 1,
-    position: new Vector2(gridCells(6), gridCells(5)),
-    animations: new Animations({
-        walkUp: new FrameIndexPattern(WALK_UP),
-        walkDown: new FrameIndexPattern(WALK_DOWN),
-        walkLeft: new FrameIndexPattern(WALK_LEFT),
-        walkRight: new FrameIndexPattern(WALK_RIGHT),
-        standUp: new FrameIndexPattern(STAND_UP),
-        standDown: new FrameIndexPattern(STAND_DOWN),
-        standLeft: new FrameIndexPattern(STAND_LEFT),
-        standRight: new FrameIndexPattern(STAND_RIGHT),
-    })
-})
 
-const heroDestinationPosition = hero.position.duplicate();
-let heroFacing = DOWN;
 
-const shadow = new Sprite({
-    resource: resources.images.shadow,
-    frameSize: new Vector2(32, 32),
-})
+const hero = new Hero(gridCells(6), gridCells(5))
+mainScene.addChild(hero);
 
-const input = new Input();
+// Add input class to main scene
+mainScene.input = new Input();
 
+// Making update and draw loops
 const update = (delta) => {
-
-    const distance = moveTowards(hero, heroDestinationPosition, 1)
-    const hasArrived = distance <= 1;
-    // Attempt to move again if hero is at its position
-    if (hasArrived) {
-        tryMove()
-    }
-    
-
-    // Work on hero animations
-    hero.step(delta);
+    mainScene.stepEntry(delta, mainScene)
 };
 
-const tryMove = () => {
 
-    if (!input.direction) {
-        if (heroFacing === LEFT) { hero.animations.play("standLeft")};
-        if (heroFacing === RIGHT) { hero.animations.play("standRight")};
-        if (heroFacing === UP) { hero.animations.play("standUp")};
-        if (heroFacing === DOWN) { hero.animations.play("standDown")};
-
-        return;
-    }
-
-    let nextX = heroDestinationPosition.x;
-    let nextY = heroDestinationPosition.y;
-    const gridSize = 16;
-
-    if (input.direction === LEFT) {
-        nextX -= gridSize;
-        hero.animations.play("walkLeft");
-    }
-
-    if (input.direction === RIGHT) {
-        nextX += gridSize;
-        hero.animations.play("walkRight");
-    }
-
-    if (input.direction === UP) {
-        nextY -= gridSize;
-        hero.animations.play("walkUp");
-    }
-
-    if (input.direction === DOWN) {
-        nextY += gridSize;
-        hero.animations.play("walkDown");
-    }
-    heroFacing = input.direction ?? heroFacing;
-
-    // Validating that next grid cell is free
-    if (isSpaceFree(walls, nextX, nextY)) {
-        heroDestinationPosition.x = nextX;
-        heroDestinationPosition.y = nextY;
-    }
-}
 
 const draw = () => {
-    skySprite.drawImage(ctx, 0, 0);
-    groundSprite.drawImage(ctx, 0, 0);
 
-    // Center hero pos in cell
-    const heroOffset = new Vector2(-8, -21);
-    const heroPosX = hero.position.x+heroOffset.x;
-    const heroPosY = hero.position.y+1+heroOffset.y;
-
-    shadow.drawImage(ctx, heroPosX, heroPosY);
-    hero.drawImage(ctx, heroPosX, heroPosY);
+    mainScene.draw(ctx, 0, 0);
 }
 
-
+// Starting the machine 
 const gameLoop = new GameLoop(update, draw);
 gameLoop.start();
